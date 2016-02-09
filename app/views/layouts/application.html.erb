@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TopgradeLogistic</title>
+  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+
+
+<body style="background-color:#F5F5F5;" class="<%= "#{action_name}-action #{controller_name}-controller" %>">
+
+<div class="header">
+  <div class="container"> 
+
+    <input type="checkbox" id="menu-switch">
+    <ul class="menu row">
+      <li class="col-md-2">
+        <h4 class="logo">上品物流</h4>
+      </li> 
+
+      <li class="col-md-1"><a href="#">服務</a></li>
+      <li class="col-md-1"><a href="#">問題</a></li>
+      <li class="col-md-1"><a href="#">聯絡</a></li>
+    </ul>   
+    <label for="menu-switch" class="label-switch"><span class="glyphicon glyphicon-menu-hamburger"></span></label> 
+
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+	  <div class="col-md-12">
+      <% if flash[:notice].present? %>
+        <div class="alert alert-success" role="alert">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+      <% if flash[:alert].present? %>
+        <div class="alert alert-danger" role="alert">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+			<%= yield %>
+		</div>
+	</div>
+</div>
+
+</body>
+</html>

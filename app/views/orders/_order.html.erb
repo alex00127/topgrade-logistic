@@ -1,0 +1,111 @@
+<% if @order.errors %>
+  <ul>
+  <% @order.errors.full_messages.each do |e| %>
+    <li><%= e %></li>
+  <% end %>
+  </ul>
+<% end %>
+
+<div class="order_block">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <%= f.label :shipper_add ,"運送路線"%>
+        <%= f.text_field :shipper_add, :class => "form-control", :placeholder => "出貨點" %>
+      </div>
+    </div>
+  </div>
+
+  <%= f.nested_fields_for :stops do |ff| %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+      
+          <%= ff.text_field :consignee_add, :class => "form-control", :placeholder => "收貨點" %>
+          <%= ff.remove_nested_fields_link "", :class=> "glyphicon glyphicon-remove-sign"%>   
+        </div>
+
+      </div>
+    </div>
+  <% end %>
+  <p><%= f.add_nested_fields_link :stops ,"新增收貨點", :class=> "glyphicon glyphicon-plus-sign"%></p>
+
+</div>
+
+<div class="row">
+
+  <div class="col-md-6">
+    <div class="order_block">
+      <label>貨品資料</label>
+      <div class="form-group">
+        <%= f.text_field :weight, :class => "form-control", :placeholder => "貨品總重"  %>
+      </div> 
+
+      <div class="form-group">
+        <%= f.text_field :volume, :class => "form-control", :placeholder => "貨品材積"%>
+      </div>
+
+      <div class='input-group date' id='datetimepicker1'>
+        <%= f.text_field :shipping_time, :class => "form-control", :placeholder => "請選擇出貨時間" %>
+        <span class="input-group-addon">
+            <span class="glyphicon glyphicon-calendar"></span>
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="order_block">
+      <label>出貨人資料</label>
+      <div class="form-group">
+        <%= f.text_field :shipper, :class => "form-control", :placeholder => "姓名" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.text_field :shipper_tel, :class => "form-control", :placeholder => "電話"  %>
+      </div>  
+
+      <div class="form-group">
+        <%= f.text_field :shipper_tel, :class => "form-control", :placeholder => "Email"  %>
+      </div> 
+
+    </div>
+  </div>
+
+</div>
+
+<div class="order_block">
+  <label>總運費：  NT  元整</label>
+  <div class="form-group">
+    <%= f.text_field :amount, :class => "hidden"%>
+  </div>
+
+</div>
+
+
+
+<div class="form-group">
+  <%= f.text_area :remark, :class => "form-control",:rows=>5, :placeholder => "是否有任何備註事項?" %>
+</div>  
+
+
+
+
+
+<script type="text/javascript">
+  $(function () {
+    $('#datetimepicker1').datetimepicker({
+
+      format: 'YYYY-MM-DD'
+      
+      
+    });
+  });
+</script>
+
+
+
+
+
+

@@ -1,0 +1,25 @@
+.new-action.orders-controller {
+
+	.order_block {
+	  margin-top: 20px;
+	  margin-bottom: 20px;
+	  border: 1px solid #F0F0F0;
+	  padding-top: 20px;
+	  padding-left: 30px;
+	  padding-right: 30px;
+	  padding-bottom: 20px;
+	  background: #FFFFFF ;
+	}
+
+	.order_block label{
+	  font-size: 18px;
+	}
+
+	.order_block .glyphicon-remove-sign {
+    float:right;
+    top:-23px;
+    right: 10px;
+    z-index:1;
+	}
+
+}
