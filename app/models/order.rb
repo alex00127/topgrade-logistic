@@ -1,5 +1,5 @@
 class Order < ActiveRecord::Base
-  validates_presence_of :shipper, :shipper_add , :shipper_tel, :shipping_time, :volume, :weight
+  validates_presence_of :shipper, :shipper_add , :shipper_tel, :shipping_time
 
 	has_many :stops, :dependent => :destroy
   belongs_to :user

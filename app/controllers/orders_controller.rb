@@ -1,5 +1,7 @@
 class OrdersController < ApplicationController
 	
+  before_action :authenticate_user!, :except => [:index]
+
 	def index
 
 	end
@@ -11,6 +13,9 @@ class OrdersController < ApplicationController
 
 	def create
 		@order = Order.new(order_params)
+		
+    @order.user = current_user
+    @order.status = "new"
 
 		if @order.save
 		  redirect_to orders_path
@@ -18,6 +23,9 @@ class OrdersController < ApplicationController
 		else
 			render :action => :new
 		end
+	end
+
+	def test 
 	end
 
   protected

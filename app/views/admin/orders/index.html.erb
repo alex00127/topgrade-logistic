@@ -1,0 +1,25 @@
+<h2>司機接單專區</h2>
+<table class="table">
+  <thead> 
+    <tr>
+   	 <th>出貨人</th>
+     <th>出貨時間</th>
+   	 <th>出貨點</th>
+     <th>最遠收貨點</th>
+     <th>總金額</th>
+     <th>目前狀態</th>
+     <th>動作</th>
+   </tr>
+  </thead>
+	<% @orders.each do |o|%>
+		<tr>
+		  <td><%= o.shipper %></td>
+		  <td><%= o.shipping_time%></td>
+		  <td><%= o.shipper_add%></td> 
+		  <td><%= o.stops.last.consignee_add%></td>
+		  <td><%= o.amount%></td>
+		  <td><%= o.status%></td>
+		  <td><%= link_to "詳細內容", order_path(o), :class => "btn btn-primary" %></td>
+		</tr>  
+	<%end%>
+</table>

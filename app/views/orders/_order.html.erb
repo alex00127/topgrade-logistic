@@ -6,29 +6,35 @@
   </ul>
 <% end %>
 
-<div class="order_block">
+<div class="order_block locations">
   <div class="row">
     <div class="col-md-12">
       <div class="form-group">
         <%= f.label :shipper_add ,"運送路線"%>
-        <%= f.text_field :shipper_add, :class => "form-control", :placeholder => "出貨點" %>
+        <%= f.text_field :shipper_add, :class => "form-control stop_input", :placeholder => "出貨點" %>
       </div>
     </div>
   </div>
 
-  <%= f.nested_fields_for :stops do |ff| %>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="form-group">
-      
-          <%= ff.text_field :consignee_add, :class => "form-control", :placeholder => "收貨點" %>
-          <%= ff.remove_nested_fields_link "", :class=> "glyphicon glyphicon-remove-sign"%>   
-        </div>
+  <div id="stops">
+    <%= f.nested_fields_for :stops do |ff| %>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+        
+            <%= ff.text_field :consignee_add, :class => "form-control",:placeholder => "收貨點" %>
+            <%= ff.remove_nested_fields_link "", :class=> "glyphicon glyphicon-remove-sign"%>   
+          </div>
 
+        </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
   <p><%= f.add_nested_fields_link :stops ,"新增收貨點", :class=> "glyphicon glyphicon-plus-sign"%></p>
+
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+  顯示於地圖
+</button>
 
 </div>
 
@@ -75,37 +81,330 @@
 
 </div>
 
-<div class="order_block">
-  <label>總運費：  NT  元整</label>
-  <div class="form-group">
-    <%= f.text_field :amount, :class => "hidden"%>
+<div class="order_block price_cal">
+
+  <div>總運費共:
+    <span class="fee"></span><%= f.text_field :amount %>元整
+  </div>
+  
+  <div class="price_detail">
+    (最遠距離:<span class="dist"></span>KM,
+    價格計算:起車價800元 + <span class="dist"></span>KM*20元 + <span class="remain_stops_count"></span>個中途點*200元)
   </div>
 
+
+
 </div>
-
-
 
 <div class="form-group">
   <%= f.text_area :remark, :class => "form-control",:rows=>5, :placeholder => "是否有任何備註事項?" %>
 </div>  
 
 
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">各運送點位置</h4>
+      </div>
+      <div class="modal-body">
+        <div id="map"></div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>      
 
 
+<div id="right-panel">
+  <div id="inputs">
+  </div>
+  <div id="output"></div>
+</div>
 
-<script type="text/javascript">
-  $(function () {
-    $('#datetimepicker1').datetimepicker({
+<div class="autocomplete">
+  <input id="autocomplete" class="form-control" placeholder="Enter a city" type="text" />
+</div>
 
-      format: 'YYYY-MM-DD'
-      
-      
-    });
+
+<script>
+
+$('#datetimepicker1').datetimepicker({
+  format: 'YYYY-MM-DD'  
+});
+
+$('body').on("click", '.locations input', function () {
+
+  $(".locations").find("input").each(function(){
+    $(this).show();
+  })
+
+  $(this).hide(); 
+  $('#autocomplete').val($(this).val());
+  $(this).after( $('#autocomplete') );
+  $('#autocomplete').focus();
+
+});
+
+function autocomplete() {
+  var markersArray = [];   
+  var places;
+
+  var autocomplete;
+  var countryRestrict = {'country': 'tw'};
+  // Create the autocomplete object and associate it with the UI input control.
+  // Restrict the search to the default country, and to place type "cities".
+    autocomplete = new google.maps.places.Autocomplete(
+      /** @type {!HTMLInputElement} */ (
+          document.getElementById('autocomplete')), {
+        types: ['geocode'],
+        componentRestrictions: countryRestrict
+      });    
+  //places = new google.maps.places.PlacesService(map);
+
+  autocomplete.addListener('place_changed', function() {
+
+    var place = autocomplete.getPlace();
+    var value = place.formatted_address;
+    $('#autocomplete').prev().val(value);
+
+
   });
+
+
+
+  $('#autocomplete').change(function () {
+    var map = new google.maps.Map(document.getElementById('map'), {
+      //center: {lat: 25.033493, lng: 121.564101},
+      //zoom: 10
+    });
+    var geocoder = new google.maps.Geocoder;
+
+    var service = new google.maps.DistanceMatrixService;
+
+     
+    deleteMarkers(markersArray);
+    drawmap(map,geocoder,service,markersArray);    
+    $('#map').show();    
+    $(this).prev().val($(this).val());
+    deleteMarkers(markersArray);
+    calculateDistance(map,geocoder,service,markersArray);    
+  });
+
+  $('#modal_button').click(function () {
+
+    var map = new google.maps.Map(document.getElementById('map'), {
+      //center: {lat: 25.033493, lng: 121.564101},
+      //zoom: 10
+    });
+    var geocoder = new google.maps.Geocoder;
+
+    var service = new google.maps.DistanceMatrixService;
+
+     
+    deleteMarkers(markersArray);
+    drawmap(map,geocoder,service,markersArray);    
+
+ 
+
+  });
+
+  $("#myModal").on("shown.bs.modal", function () {
+
+    var map = new google.maps.Map(document.getElementById('map'), {
+      //center: {lat: 25.033493, lng: 121.564101},
+      //zoom: 10
+    });
+    var geocoder = new google.maps.Geocoder;
+
+    var service = new google.maps.DistanceMatrixService;
+
+     
+    deleteMarkers(markersArray);
+    drawmap(map,geocoder,service,markersArray);  
+
+      google.maps.event.trigger(map, "resize");
+  });
+
+}
+
+
+
+
+
+
+
+function calculateDistance(map,geocoder,service,markersArray) {
+  var bounds = new google.maps.LatLngBounds;
+  
+  var destinationIcon = 'https://chart.googleapis.com/chart?' +
+      'chst=d_map_pin_letter&chld=D|FF0000|000000';
+  var originIcon = 'https://chart.googleapis.com/chart?' +
+      'chst=d_map_pin_letter&chld=O|FFFF00|000000';
+
+  var stops = [];
+  var max_dist = 0;
+
+  $("#stops").find("input").each(function(){
+    stops.push($(this).val());
+  })
+
+  service.getDistanceMatrix({
+    origins: [document.getElementById('order_shipper_add').value],
+    destinations: stops,
+    travelMode: google.maps.TravelMode.DRIVING,
+    unitSystem: google.maps.UnitSystem.METRIC,
+    avoidHighways: false,
+    avoidTolls: false
+  }, function(response, status) {
+    if (status !== google.maps.DistanceMatrixStatus.OK) {
+      alert('Error was: ' + status);
+    } else {
+      var originList = response.originAddresses;
+      var destinationList = response.destinationAddresses;
+      var outputDiv = document.getElementById('output');
+      outputDiv.innerHTML = '';
+      
+
+      var showGeocodedAddressOnMap = function(asDestination) {
+        var icon = asDestination ? destinationIcon : originIcon;
+        return function(results, status) {
+          if (status === google.maps.GeocoderStatus.OK) {
+            map.fitBounds(bounds.extend(results[0].geometry.location));
+            markersArray.push(new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location,
+              icon: icon
+            }));
+          } else {
+            //alert('Geocode was not successful due to: ' + status);
+          }
+        };
+      };
+
+      for (var i = 0; i < originList.length; i++) {
+        var results = response.rows[i].elements;
+        geocoder.geocode({'address': originList[i]},
+            showGeocodedAddressOnMap(false));
+        for (var j = 0; j < results.length; j++) {
+          
+          geocoder.geocode({'address': destinationList[j]},
+              showGeocodedAddressOnMap(true));
+          outputDiv.innerHTML += originList[i] + ' to ' + destinationList[j] +
+              ': ' + results[j].distance.text + ' in ' +
+              results[j].duration.text + '<br>';
+
+          if (parseInt(results[j].distance.text) > max_dist){    
+            max_dist = parseInt(results[j].distance.text);
+            $('.dist').html(max_dist);
+            $('.remain_stops_count').html(results.length - 1);
+            $('#order_amount').text( 800 + max_dist*20 + (results.length - 1)*200 );
+            $('.price_detail').show();
+          }
+          
+        }
+      }
+    }
+  });
+  
+}
+
+
+
+function drawmap(map,geocoder,service,markersArray) {
+  var bounds = new google.maps.LatLngBounds;
+  
+  var destinationIcon = 'https://chart.googleapis.com/chart?' +
+      'chst=d_map_pin_letter&chld=D|FF0000|000000';
+  var originIcon = 'https://chart.googleapis.com/chart?' +
+      'chst=d_map_pin_letter&chld=O|FFFF00|000000';
+
+  var stops = [];
+
+
+  $("#stops").find("input").each(function(){
+    stops.push($(this).val());
+  })
+
+  service.getDistanceMatrix({
+    origins: [document.getElementById('order_shipper_add').value],
+    destinations: stops,
+    travelMode: google.maps.TravelMode.DRIVING,
+    unitSystem: google.maps.UnitSystem.METRIC,
+    avoidHighways: false,
+    avoidTolls: false
+  }, function(response, status) {
+    if (status !== google.maps.DistanceMatrixStatus.OK) {
+      alert('Error was: ' + status);
+    } else {
+      var originList = response.originAddresses;
+      var destinationList = response.destinationAddresses;
+      var outputDiv = document.getElementById('output');
+      outputDiv.innerHTML = '';
+      
+
+      var showGeocodedAddressOnMap = function(asDestination) {
+        var icon = asDestination ? destinationIcon : originIcon;
+        return function(results, status) {
+          if (status === google.maps.GeocoderStatus.OK) {
+            map.fitBounds(bounds.extend(results[0].geometry.location));
+            markersArray.push(new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location,
+              icon: icon
+            }));
+          } else {
+            //alert('Geocode was not successful due to: ' + status);
+          }
+        };
+      };
+
+      for (var i = 0; i < originList.length; i++) {
+        var results = response.rows[i].elements;
+        geocoder.geocode({'address': originList[i]},
+            showGeocodedAddressOnMap(false));
+        for (var j = 0; j < results.length; j++) {
+          
+          geocoder.geocode({'address': destinationList[j]},
+              showGeocodedAddressOnMap(true));
+          
+        }
+      }
+    }
+  });
+  
+}
+
+function deleteMarkers(markersArray) {
+  for (var i = 0; i < markersArray.length; i++) {
+    markersArray[i].setMap(null);
+  }
+  markersArray = [];
+}
+
 </script>
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCyO3ShpKZRqy0cT6Ta8h_BAOZTFvaX5mU&libraries=places&signed_in=true&callback=drawmap&callback=autocomplete"
+    async defer></script>
 
-
-
-
+<!-- Google Code for &#20272;&#20729; Conversion Page -->
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 923199565;
+var google_conversion_language = "en";
+var google_conversion_format = "3";
+var google_conversion_color = "ffffff";
+var google_conversion_label = "E6uqCPDLlWYQzdCbuAM";
+var google_remarketing_only = false;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//www.googleadservices.com/pagead/conversion/923199565/?label=E6uqCPDLlWYQzdCbuAM&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
 

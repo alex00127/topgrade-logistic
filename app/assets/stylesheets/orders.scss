@@ -22,4 +22,52 @@
     z-index:1;
 	}
 
+  .price_cal{
+	 	font-size: 1.6em;
+	 	letter-spacing: 2px;
+
+  }
+
+  .price_detail {
+    display:none;
+  }
+
+
+  #map {
+    height: 500px;
+    width: 100%;
+  }
+
+	#right-panel {
+	  font-family: 'Roboto','sans-serif';
+	  line-height: 30px;
+	  padding-left: 10px;
+	}
+
+	#right-panel select, #right-panel input {
+	  font-size: 15px;
+	}
+
+	#right-panel select {
+	  width: 100%;
+	}
+
+	#right-panel i {
+	  font-size: 12px;
+	}
+
+  #right-panel {
+    
+    width: 48%;
+    padding-left: 2%;
+  }
+  #output {
+    font-size: 11px;
+  }
+
+ .autocomplete{
+
+   display: none;
+ }
+
 }

@@ -1,0 +1,36 @@
+
+.index-action.orders-controller {
+  .pic{
+    background-image: image-url("index_cover.jpg");
+    background-size:cover;
+    height: 82vh;
+    margin-bottom:60px;
+    margin-top:60px;
+  }
+
+  .index-text{
+  	text-align: center;
+ 	  position: relative;
+ 	  top: 12%;
+    transform: translateY(-50%);
+  }
+
+  .p-big{
+  	color: #fff;
+	 	font-size: 3em;
+	 	letter-spacing: 5px;
+	 	padding-bottom: 50px;
+ }
+  .p-small{
+	 	font-size: 2em;
+	 	letter-spacing: 2px;
+	 	padding-bottom: 15px;
+	 	color: #EDE7E1;
+	 	position: relative;
+ 	  bottom: 15%;
+ }
+
+
+
+
+ }
